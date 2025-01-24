@@ -1,5 +1,5 @@
 # Bluesky Firehose
-Bluesky is a decentralized social media application. This project aims to explore Bluesky's data and process it for both real-time and historical analytics. It will levearge Bluesky's Firehose API, which offers a high volume data feed of all Bluesky posts. 
+Bluesky is a decentralized social media application. This project aims to explore Bluesky's data and process it for both real-time analytics and historical analytics. It will leverage Bluesky's Firehose API, which offers a high volume data feed of all Bluesky posts. 
 
 ## Architecture
 
