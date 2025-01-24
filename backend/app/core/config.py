@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     DATABASE_PORT: str = os.getenv("DATABASE_PORT", "5432")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB")
 
+    # Kafka configuration
+    KAFKA_BOOTSTRAP_SERVERS: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:29092")
+
     # API configuration
     API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = "Bluesky Analytics"
