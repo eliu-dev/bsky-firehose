@@ -10,14 +10,14 @@ class Settings(BaseSettings):
     # Environment name
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "dev")
 
-    POSTGRES_USER: str = os.getenv("POSTGRES_USER")
-    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD")
-    DATABASE_HOST: str = os.getenv("DATABASE_HOST")
-    DATABASE_PORT: str = os.getenv("DATABASE_PORT", "5432")
-    POSTGRES_DB: str = os.getenv("POSTGRES_DB")
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    DATABASE_HOST: str
+    POSTGRES_PORT: str
+    POSTGRES_DB: str
 
     # Kafka configuration
-    KAFKA_BOOTSTRAP_SERVERS: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:29092")
+    KAFKA_BOOTSTRAP_SERVERS: str
 
     # API configuration
     API_V1_STR: str = "/api/v1"
@@ -25,7 +25,7 @@ class Settings(BaseSettings):
 
     @property
     def DATABASE_URL(self) -> str:
-        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.POSTGRES_DB}"
+        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.DATABASE_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     @property
     def CORS_ORIGINS(self):
@@ -39,4 +39,4 @@ class Settings(BaseSettings):
 
 
 # Create a global settings object
-settings = Settings()
+settings = Settings() # type: ignore
