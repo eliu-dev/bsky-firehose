@@ -2,6 +2,7 @@ from email import message
 import logging
 import asyncio
 import zstandard as zstd
+import json
 
 from multiprocessing import Value
 import urllib.parse
@@ -76,6 +77,7 @@ class JetstreamClient:
         
         async for msg in self.websocket:
             try:
+                print("Raw message structure:", json.dumps(json.loads(msg), indent=2))
                 parsed_msg: jetstream_types.Message = jetstream_types.Message.model_validate_json(msg)
                 print(parsed_msg)
                 yield parsed_msg

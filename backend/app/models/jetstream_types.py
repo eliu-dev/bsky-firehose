@@ -16,10 +16,16 @@ class Subject(JetstreamBase):
     cid: str
     uri: str
 
+class Reply(JetstreamBase):
+    parent: Subject
+    root: Subject
 class Record(JetstreamBase):
     record_type: str = Field(alias="$type")
     createdAt: datetime
-    subject: Subject
+    subject: Optional[Subject] = None
+    text: Optional[str] = None
+    langs: Optional[list[str]] = None
+    reply: Optional[Reply] = None
 
 class Commit(JetstreamBase):
     rev: str
