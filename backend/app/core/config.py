@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
-    DATABASE_HOST: str
+    POSTGRES_HOST: str
     POSTGRES_PORT: str
     POSTGRES_DB: str
 
@@ -25,7 +25,7 @@ class Settings(BaseSettings):
 
     @property
     def DATABASE_URL(self) -> str:
-        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.DATABASE_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     @property
     def CORS_ORIGINS(self):

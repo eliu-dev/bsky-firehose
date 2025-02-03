@@ -1,14 +1,12 @@
 import asyncio
 import logging
+from app.models.jetstream_types import Record
+from app.core.logging import setup_local_logging
+from app.services.jetstream_client import JetstreamClient
 
-from backend.app.models.jetstream_types import Record
-from backend.app.services.jetstream_client import JetstreamClient
+setup_local_logging()
+logger = logging.getLogger(__name__)
 
-# Set up logging to see what's happening
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
 
 def test_model():
     print('Test Model')
@@ -32,13 +30,13 @@ async def test_connection():
     try:
         # Connect and start receiving messages
         async for message in client.stream_messages():
-            print(f"\nReceived message from: {message.did}")
+            logger.info(f"\nReceived message from: {message.did}")
+            logger.info(message)
             if message.commit and message.commit.record:
-                print(f"Collection: {message.commit.collection}")
-                print(f"Operation: {message.commit.operation}")
+                logger.info(f"Collection: {message.commit.collection}")
+                logger.info(f"Operation: {message.commit.operation}")
     except Exception as e:
-        print(f"Error during streaming: {e}")
-        print(e.args)
+        logger.exception(f"Error during streaming: {e}")
     finally:
         # Always clean up
         await client.disconnect()

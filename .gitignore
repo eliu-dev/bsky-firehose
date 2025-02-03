@@ -131,3 +131,9 @@ dist
 
 *__pycache__
 *.DS_Store
+
+*drawio
+*.venv
+
+*.vscode
+*.settings.json

@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bsky-analytics"
+version = "0.1.0"
+description = "Bluesky Analytics data processing application"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.68.0",
+    "uvicorn>=0.15.0",
+    "sqlalchemy>=1.4.0",
+    "asyncpg>=0.25.0",
+    "alembic>=1.7.0",
+    "python-dotenv>=0.19.0",
+    "pydantic",
+    "pydantic-settings",
+    "atproto>=0.0.57",
+    "aiokafka>=0.8.1",
+    "websockets>=13.0",
+    "zstandard>=0.23",
+]
+
+[project.optional-dependencies]
+# Development tools that aren't needed in production
+dev = [
+    "pytest>=7.0",
+    "black>=22.0",
+    "isort>=5.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+# Package discovery to enable dockerfile to discover /backend module
+[tool.hatch.build]
+include = [
+    "backend/**/*.py",
+    "backend/**/*.pyi"
+]

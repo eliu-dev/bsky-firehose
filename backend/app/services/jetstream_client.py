@@ -1,12 +1,11 @@
 from email import message
 import logging
-import asyncio
 import zstandard as zstd
 import json
 
 from multiprocessing import Value
 import urllib.parse
-from backend.app.models import jetstream_types
+from app.models import jetstream_types
 from typing import Optional
 from pydantic import ValidationError
 from websockets import ConnectionClosedOK
@@ -14,17 +13,33 @@ from websockets.asyncio.client import connect, ClientConnection
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-
 class JetstreamClient:
+    """Client for connecting to and streaming Jetstream messages."""
+
     JETSTREAM_HOSTS: dict[str, str] = {
         'us-east-1': 'jetstream1.us-east.bsky.network',
         'us-east-2': 'jetstream2.us-east.bsky.network',
-        'us-west1': 'jetstream1.us-west.bsky.network',
-        'us-west2': 'jetstream2.us-west.bsky.network'
+        'us-west-1': 'jetstream1.us-west.bsky.network',
+        'us-west-2': 'jetstream2.us-west.bsky.network'
 
     }
 
-    def __init__(self, host: str = 'us-east-1', collections: list[str] = [], max_message_size_bytes: int = 0, wanted_dids: list[str] = [],compress: bool = False):
+    def __init__(self, host: str = 'us-east-1', collections: list[str] = [], max_message_size_bytes: int = 0, wanted_dids: list[str] = [],compress: bool = False) -> None:
+        """Instantiates Jetstream Client.
+        
+        Args:
+        ----
+        host: Bluesky host server to use (us-east-1, us-east-2, us-west-1, or us-west-2). Defaults to us-east-1.
+        collections: list of strings representing Bluesky collections to include (e.g., ["app.bsky.feed.post"])
+        max_message_size_bytes: int representing max message size. Defaults to no limit (0).
+        wanted_dids: list of string decentralized identifiers (DID) for retrieving specific records
+        compress: bool of whether to deliver compressed data (zstd compressor). Defaults to false.
+        
+        Returns:
+        -------
+        None
+
+        """
         if host not in self.JETSTREAM_HOSTS:
             raise ValueError(f'Invalid Jetstream host specified: {host}. Must be one of {', '.join(self.JETSTREAM_HOSTS.keys())}')
         self.host: str = f'wss://{self.JETSTREAM_HOSTS[host]}/subscribe'
@@ -77,12 +92,13 @@ class JetstreamClient:
         
         async for msg in self.websocket:
             try:
-                print("Raw message structure:", json.dumps(json.loads(msg), indent=2))
+                logger.info("Raw message structure:", json.dumps(json.loads(msg), indent=2))
+                logger.log(msg=message, level=logging.INFO)
                 parsed_msg: jetstream_types.Message = jetstream_types.Message.model_validate_json(msg)
-                print(parsed_msg)
                 yield parsed_msg
             except ConnectionClosedOK:
+                logger.info('Connection closed.')
                 break
-            except ValidationError as e:
-                print(f'Jetstream message validation error: {e}')
+            # except ValidationError as e:
+                # print(f'Jetstream message validation error: {e}')
 
