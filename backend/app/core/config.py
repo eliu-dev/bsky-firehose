@@ -1,11 +1,48 @@
+from enum import Enum
 import os
+from typing import Dict, Optional
+from pydantic import Field, validator
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
+class Environment(str, Enum):
+    DEVELOPMENT = "development"
+    PRODUCTION = "production"
 
+class KafkaSettings(BaseSettings):
+    """
+    Kafka-specific settings that can be loaded from environment variables.
+    Each setting includes a description and default value.
+    """
+
+    # Core Kafka settings
+    KAFKA_BOOTSTRAP_SERVERS: str
+    KAFKA_TOPIC_NAME: str
+    KAFKA_TOPIC_PARTITIONS: int = Field(gt=0)
+    KAFKA_TOPIC_REPLICATION_FACTOR: int = Field(gt=0)
+
+    # Producer settings
+    KAFKA_BATCH_SIZE: int = Field(ge=16384)
+    KAFKA_LINGER_MS: int = Field(ge=0)
+
+    # Consumer settings
+    KAFKA_MAX_POLL_RECORDS: int = Field(gt=100)
+    
+    # AWS MSK settings (placeholder for production)
+    AWS_REGION: Optional[str] = None
+    MSK_CLUSTER_ARN: Optional[str] = None
+
+    @validator('TOPIC_PARTITIONS', 'TOPIC_REPLICATION_FACTOR', 
+              'BATCH_SIZE', 'MAX_POLL_RECORDS')
+    def validate_positive_integers(cls, v):
+        """Validate that certain settings have positive values."""
+        if v <= 0:
+            raise ValueError("Value must be positive")
+        return v
+        
 class Settings(BaseSettings):
     # Environment name
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "dev")
