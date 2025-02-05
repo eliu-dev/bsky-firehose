@@ -34,14 +34,6 @@ class KafkaSettings(BaseSettings):
     # AWS MSK settings (placeholder for production)
     AWS_REGION: Optional[str] = None
     MSK_CLUSTER_ARN: Optional[str] = None
-
-    @validator('TOPIC_PARTITIONS', 'TOPIC_REPLICATION_FACTOR', 
-              'BATCH_SIZE', 'MAX_POLL_RECORDS')
-    def validate_positive_integers(cls, v):
-        """Validate that certain settings have positive values."""
-        if v <= 0:
-            raise ValueError("Value must be positive")
-        return v
         
 class Settings(BaseSettings):
     # Environment name
@@ -53,9 +45,8 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str
     POSTGRES_DB: str
 
-    # Kafka configuration
-    KAFKA_BOOTSTRAP_SERVERS: str
-
+    kafka_settings: KafkaSettings
+    
     # API configuration
     API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = "Bluesky Analytics"
