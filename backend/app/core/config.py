@@ -23,6 +23,7 @@ class KafkaSettings(BaseSettings):
     KAFKA_TOPIC_NAME: str
     KAFKA_TOPIC_PARTITIONS: int = Field(gt=0)
     KAFKA_TOPIC_REPLICATION_FACTOR: int = Field(gt=0)
+    KAFKA_GROUP_ID_BSKY: str
 
     # Producer settings
     KAFKA_BATCH_SIZE: int = Field(ge=16384)
@@ -30,6 +31,7 @@ class KafkaSettings(BaseSettings):
 
     # Consumer settings
     KAFKA_MAX_POLL_RECORDS: int = Field(gt=100)
+    
     
     # AWS MSK settings (placeholder for production)
     AWS_REGION: Optional[str] = None
