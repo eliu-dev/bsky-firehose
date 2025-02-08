@@ -12,10 +12,10 @@ from app.core.logging import setup_local_logging, setup_prod_logging
 from app.core.config import settings
 import os
 
-ENVIRONMENT: str = os.getenv('ENVIRONMENT', 'dev')
-if ENVIRONMENT == 'dev':
+ENVIRONMENT: str = os.getenv('ENVIRONMENT', 'development')
+if ENVIRONMENT == 'development':
     setup_local_logging()
-elif ENVIRONMENT == 'prod':
+elif ENVIRONMENT == 'production':
     setup_prod_logging()
 
 app = FastAPI(

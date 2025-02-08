@@ -7,8 +7,7 @@ import os
 from dotenv import load_dotenv
 
 root = Path(__file__).parent.parent.parent
-print(root)
-load_dotenv(root / '.env.dev')
+load_dotenv(root / '.env.development')
 ENVIRONMENT = os.getenv('ENVIRONMENT')
 if ENVIRONMENT is None:
     raise ValueError(f'Missing env variable: ENVIRONMENT')
@@ -29,6 +28,19 @@ def setup_local_logging() -> None:
     )
     file_handler.setFormatter(logging.Formatter('[%(levelname)s] %(name)s %(asctime)s: %(message)s'))
     root.addHandler(file_handler)
+
+    stderr_handler = logging.StreamHandler(sys.stderr)
+    stderr_handler.setFormatter(logging.Formatter('[%(levelname)s] %(asctime)s %(name)s: %(message)s'))
+    root.addHandler(stderr_handler)
+
+    err_log_file: Path = Path(__file__).parent.parent.parent / 'logs' / f'app_{ENVIRONMENT}_error.log'
+    err_file_handler = logging.handlers.RotatingFileHandler(
+        filename= err_log_file,
+        maxBytes=int(25*(10**6)),
+        backupCount=10,
+    )
+    err_file_handler.setFormatter(logging.Formatter('[%(levelname)s] %(name)s %(asctime)s: %(message)s'))
+    root.addHandler(err_file_handler)
 
 def setup_prod_logging() -> None:
     root: logging.Logger = logging.getLogger()

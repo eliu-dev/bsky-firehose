@@ -1,5 +1,5 @@
 # Bluesky Data Explorer
-Bluesky is a decentralized social media application. This project aims to explore Bluesky's data and process it for both real-time analytics and historical analytics. It will leverage Bluesky's Firehose API via [Jetstream][https://github.com/bluesky-social/jetstream], which offers a high volume data feed of all Bluesky posts. 
+Bluesky is a decentralized social media application. This project aims to explore Bluesky's data and process it for both real-time analytics and historical analytics. It will leverage Bluesky's Firehose API via [Jetstream](https://github.com/bluesky-social/jetstream), which offers a high volume data feed of all Bluesky posts. 
 
 ## Architecture
 
@@ -14,9 +14,10 @@ Bluesky is a decentralized social media application. This project aims to explor
 - Visualization (TBD)
 
 ## Project structure
-├── docker-compose.yml
-├── .env.example              # Template for environment variables
+```
 ├── backend/
+    ├── docker-compose.yml
+    ├── .env.example              # Template for environment variables
 │   ├── __init__.py
 │   ├── Dockerfile            
 │   ├── requirements.txt      
@@ -26,18 +27,20 @@ Bluesky is a decentralized social media application. This project aims to explor
 │       │   ├── __init__.py
 │       │   ├── config.py     # Configuration management for services
 │       │   └── database.py
+│       │   └── logging.py
 │       ├── models/
 │       │   ├── __init__.py
-│       │   └── jetstream.py  # Jetstream message model
-│       ├── services/         # Business logic (where the cooking happens)
+│       │   └── jetstream_types.py  # Jetstream message model
+│       ├── services/
 │       │   ├── __init__.py
-│       │   ├── jetstream.py  
-│       │   └── kafka.py      
+│       │   ├── jetstream_client.py  
+│       │   └── kafka_client.py      
 │       └── workers/          
 │           ├── __init__.py
 │           ├── ingest.py     # Processes data from Jetstream
-│           └── process.py    # Processes data from Kafka
+│           └── process.py
 ├── frontend/                 # React frontend
 │   └── ...
 └── shared/                   # Shared types and utilities
     └── ...
+```

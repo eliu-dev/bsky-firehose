@@ -92,13 +92,14 @@ class JetstreamClient:
         
         async for msg in self.websocket:
             try:
-                logger.info("Raw message structure:", json.dumps(json.loads(msg), indent=2))
-                logger.log(msg=message, level=logging.INFO)
+                logger.info(f'Parsed json message:\n{json.dumps(json.loads(msg), indent = 2)}')
                 parsed_msg: jetstream_types.Message = jetstream_types.Message.model_validate_json(msg)
                 yield parsed_msg
             except ConnectionClosedOK:
                 logger.info('Connection closed.')
                 break
-            # except ValidationError as e:
-                # print(f'Jetstream message validation error: {e}')
+            except json.JSONDecodeError as e:
+                logger.error(f'Failed to parse message: {e}')
+            except ValidationError as e:
+                logger.error(f'Jetstream message validation error: {e}')
 

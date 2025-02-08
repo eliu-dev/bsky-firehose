@@ -1,53 +1,45 @@
-from enum import Enum
-import os
-from typing import Dict, Optional
-from pydantic import Field, validator
-from pydantic_settings import BaseSettings
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
-
-class Environment(str, Enum):
-    DEVELOPMENT = "development"
-    PRODUCTION = "production"
-
+from typing import Optional
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 class KafkaSettings(BaseSettings):
     """
-    Kafka-specific settings that can be loaded from environment variables.
-    Each setting includes a description and default value.
+    Kafka-specific settings loaded from environment variables.
     """
 
     # Core Kafka settings
-    KAFKA_BOOTSTRAP_SERVERS: str
-    KAFKA_TOPIC_NAME: str
-    KAFKA_TOPIC_PARTITIONS: int = Field(gt=0)
-    KAFKA_TOPIC_REPLICATION_FACTOR: int = Field(gt=0)
-    KAFKA_GROUP_ID_BSKY: str
+    KAFKA_BOOTSTRAP_SERVERS: str = Field(frozen = True)
+    # KAFKA_TOPIC_NAME: str
+    # KAFKA_TOPIC_PARTITIONS: int = Field(gt=0)
+    # KAFKA_TOPIC_REPLICATION_FACTOR: int = Field(gt=0)
 
     # Producer settings
-    KAFKA_BATCH_SIZE: int = Field(ge=16384)
-    KAFKA_LINGER_MS: int = Field(ge=0)
+    KAFKA_BATCH_SIZE: int = Field(ge=16384, frozen = True)
+    KAFKA_LINGER_MS: int = Field(ge=0, frozen = True)
+    KAFKA_GROUP_ID_BSKY: str = Field(frozen = True)
 
     # Consumer settings
-    KAFKA_MAX_POLL_RECORDS: int = Field(gt=100)
-    
+    KAFKA_MAX_POLL_RECORDS: int = Field(ge=100)
     
     # AWS MSK settings (placeholder for production)
-    AWS_REGION: Optional[str] = None
-    MSK_CLUSTER_ARN: Optional[str] = None
-        
+    KAFKA_AWS_REGION: Optional[str] = None
+    KAFKA_MSK_CLUSTER_ARN: Optional[str] = None
+
+    model_config = SettingsConfigDict(
+        case_sensitive = True,
+        env_file = '.env.development',
+        extra = 'allow'
+    )
+            
 class Settings(BaseSettings):
+
     # Environment name
-    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "dev")
+    ENVIRONMENT: str = Field(default = 'development', frozen = True)
 
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_HOST: str
-    POSTGRES_PORT: str
-    POSTGRES_DB: str
-
-    kafka_settings: KafkaSettings
+    POSTGRES_USER: str = Field(frozen = True)
+    POSTGRES_PASSWORD: str = Field(frozen = True)
+    POSTGRES_HOST: str = Field(frozen = True)
+    POSTGRES_PORT: str = Field(frozen = True)
+    POSTGRES_DB: str = Field(frozen = True)
     
     # API configuration
     API_V1_STR: str = "/api/v1"
@@ -59,14 +51,18 @@ class Settings(BaseSettings):
 
     @property
     def CORS_ORIGINS(self):
-        if self.ENVIRONMENT == "dev":
+        if self.ENVIRONMENT == "development":
             return ["http://localhost:3000"]
         elif self.ENVIRONMENT == "production":
             return ["https://bsky.app"]
 
-    class Config:
-        case_sensitive = True
-
-
-# Create a global settings object
+    model_config = SettingsConfigDict(
+        case_sensitive = True,
+        env_file = '.env.{ENVIRONMENT}',
+        extra = 'allow'
+    )
+        
+        
+# Create global settings objects
 settings = Settings() # type: ignore
+kafka_settings = KafkaSettings() # type: ignore

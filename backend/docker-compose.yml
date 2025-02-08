@@ -36,25 +36,49 @@ services:
     
   
   kafka:
-    image: apache/kafka-native
+    image: bitnami/kafka:latest
     ports:
       - "9092:9092"
     environment:
-      # Configure listeners for both docker and host communication
-      KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://kafka:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
+      # KRaft settings
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: '1@localhost:9091'
+      
+      # Listeners - maintaining separate HOST and DOCKER listeners
+      KAFKA_CFG_LISTENERS: 'CONTROLLER://:9091,HOST://:9092,DOCKER://:9093'
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'HOST://localhost:9092,DOCKER://kafka:9093'
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,HOST:PLAINTEXT,DOCKER:PLAINTEXT'
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: 'DOCKER'
+      
+      # Single node settings
+      KAFKA_CFG_NUM_PARTITIONS: 1
+      KAFKA_CFG_DEFAULT_REPLICATION_FACTOR: 1
+      
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
 
-      # Settings required for KRaft mode
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091
+  # Separate topic configuration to future proof for more complex topic configurations
+  init-kafka:
+    image: bitnami/kafka:latest
+    networks: 
+      - default
+    depends_on:
+      - kafka
+    command: >
+        bash -c '
+        echo "Waiting for Kafka to be ready..."
+        sleep 15
+        
+        echo "Creating topics..."
 
-      # Listener to use for broker-to-broker communication
-      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+        kafka-topics.sh --bootstrap-server kafka:9093 --create --if-not-exists --topic bsky-posts --replication-factor 1 --partitions 1
+        
+        kafka-topics.sh --bootstrap-server kafka:9093 --create --if-not-exists --topic bsky-actors --replication-factor 1 --partitions 1
+        
+        echo "Listing created topics:"
 
-      # Required for a single node cluster
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+        kafka-topics.sh --bootstrap-server kafka:9093 --list
+        '
 volumes:
   postgres_data:
