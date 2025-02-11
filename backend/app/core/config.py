@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 class KafkaSettings(BaseSettings):
     """
@@ -8,9 +8,6 @@ class KafkaSettings(BaseSettings):
 
     # Core Kafka settings
     KAFKA_BOOTSTRAP_SERVERS: str = Field(frozen = True)
-    # KAFKA_TOPIC_NAME: str
-    # KAFKA_TOPIC_PARTITIONS: int = Field(gt=0)
-    # KAFKA_TOPIC_REPLICATION_FACTOR: int = Field(gt=0)
 
     # Producer settings
     KAFKA_BATCH_SIZE: int = Field(ge=16384, frozen = True)

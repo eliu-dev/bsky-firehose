@@ -10,7 +10,7 @@ logger: logging.Logger = logging.getLogger(__name__)
 class KafkaClient:
 
     def __init__(self, settings: KafkaSettings = kafka_settings):
-        self.settings: KafkaSettings = kafka_settings
+        self.settings: KafkaSettings = settings
         self.consumer: Optional[AIOKafkaConsumer] = None
         self.producer: Optional[AIOKafkaProducer] = None
         self._producer_closing = False

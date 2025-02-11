@@ -1,5 +1,6 @@
 # backend/tests/conftest.py
 import pytest
+import pytest_asyncio
 import asyncio
 import logging
 import os
@@ -26,41 +27,42 @@ os.environ.update({
 
 
 from app.core.config import KafkaSettings
-from app.services.jetstream_client import JetstreamClient
 from app.services.kafka_client import KafkaClient
 
 logger = logging.getLogger(__name__)
 
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create an instance of the default event loop for each test session"""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
-
-@pytest.fixture(scope="session")
-async def kafka_container():
+@pytest_asyncio.fixture(scope="session")
+async def kafka_container() -> AsyncGenerator[KafkaContainer, None]:
     """Create and configure a Kafka container for testing"""
     container = KafkaContainer()
     container.start()
-    os.environ["KAFKA_BOOTSTRAP_SERVERS"] = container.get_bootstrap_server()
     
+    # Set the bootstrap servers environment variable
+    os.environ["KAFKA_BOOTSTRAP_SERVERS"] = container.get_bootstrap_server()
+    # Create topics using the container's kafka-topics.sh command
+    topics = ['bsky-posts', 'bsky-actors']
+    for topic in topics:
+        container.with_command(f'/opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --if-not-exists --topic {topic} --replication-factor 1 --partitions 1')
+        logger.info(f"Created topic: {topic}")    
     yield container
     container.stop()
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def kafka_client(kafka_container) -> AsyncGenerator[KafkaClient, None]:
     """Create a KafkaClient configured for testing"""
-    test_settings = KafkaSettings(
-        KAFKA_BOOTSTRAP_SERVERS=kafka_container.get_bootstrap_server(),
+    bootstrap_servers = kafka_container.get_bootstrap_server()
+    logger.info(f"Bootstrap servers from container: {bootstrap_servers}")
+    
+    settings = KafkaSettings(
+        KAFKA_BOOTSTRAP_SERVERS=bootstrap_servers,
         KAFKA_BATCH_SIZE=16384,
         KAFKA_LINGER_MS=0,
         KAFKA_MAX_POLL_RECORDS=100,
-        KAFKA_GROUP_ID_BSKY="test-bsky",
-        KAFKA_AWS_REGION=None,
-        KAFKA_MSK_CLUSTER_ARN=None
+        KAFKA_GROUP_ID_BSKY="test-group"
     )
+    logger.info(f"Created settings with bootstrap servers: {settings.KAFKA_BOOTSTRAP_SERVERS}")
     
-    client = KafkaClient(settings=test_settings)
+    client = KafkaClient(settings=settings)
+    logger.info(f"Created client with settings: {client.settings.model_dump_json()}")
     yield client
     await client.close()

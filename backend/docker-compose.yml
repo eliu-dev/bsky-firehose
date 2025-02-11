@@ -51,34 +51,13 @@ services:
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,HOST:PLAINTEXT,DOCKER:PLAINTEXT'
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: 'DOCKER'
-      
+
       # Single node settings
       KAFKA_CFG_NUM_PARTITIONS: 1
       KAFKA_CFG_DEFAULT_REPLICATION_FACTOR: 1
       
       ALLOW_PLAINTEXT_LISTENER: 'yes'
+      AUTO_CREATE_TOPICS: true
 
-  # Separate topic configuration to future proof for more complex topic configurations
-  init-kafka:
-    image: bitnami/kafka:latest
-    networks: 
-      - default
-    depends_on:
-      - kafka
-    command: >
-        bash -c '
-        echo "Waiting for Kafka to be ready..."
-        sleep 15
-        
-        echo "Creating topics..."
-
-        kafka-topics.sh --bootstrap-server kafka:9093 --create --if-not-exists --topic bsky-posts --replication-factor 1 --partitions 1
-        
-        kafka-topics.sh --bootstrap-server kafka:9093 --create --if-not-exists --topic bsky-actors --replication-factor 1 --partitions 1
-        
-        echo "Listing created topics:"
-
-        kafka-topics.sh --bootstrap-server kafka:9093 --list
-        '
 volumes:
   postgres_data:

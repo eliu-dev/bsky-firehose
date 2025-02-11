@@ -24,16 +24,23 @@ async def test_kafka_message_processing(kafka_client: KafkaClient):
             "text": "test"
         }
     }
+    logger.debug(f"Created test message: {kafka_message}")
     
-    # Send and verify message
-    await kafka_client.produce_msg('bsky-posts', kafka_message)
-    
-    messages = []
-    async for msg in kafka_client.consume_msg():
-        messages.append(msg)
-        if len(messages) >= 1:
-            break
-    
-    assert len(messages) == 1
-    assert messages[0]['did'] == test_did
-    assert messages[0]['collection'] == test_collection
+    try:
+        logger.info("Producing message to Kafka...")
+        await kafka_client.produce_msg('bsky-posts', kafka_message)
+        
+        logger.info("Consuming messages from Kafka...")
+        messages = []
+        async for msg in kafka_client.consume_msg():
+            messages.append(msg)
+            if len(messages) >= 1:
+                break
+        
+        logger.info(f"Received {len(messages)} messages")
+        assert len(messages) == 1
+        assert messages[0]['did'] == test_did
+        assert messages[0]['collection'] == test_collection
+    except Exception as e:
+        logger.exception(f"Error during test: {e}")
+        raise
