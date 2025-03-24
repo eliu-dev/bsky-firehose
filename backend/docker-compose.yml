@@ -24,14 +24,14 @@ services:
     env_file: .env.development
     environment:
       POSTGRES_HOST: db
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOSTRAP_SERVERS}
     depends_on:
       db:
         condition: service_healthy
       kafka:
         condition: service_started
     volumes:
-      - ./backend:/app
+      - .:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     
   

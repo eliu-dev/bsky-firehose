@@ -39,11 +39,11 @@ class KafkaClient:
         if self.consumer is None:
             logger.info('Creating consumer. . . .')
             self.consumer = AIOKafkaConsumer(
-                bootstrap_servers = self.settings.KAFKA_BOOTSTRAP_SERVERS,
+                bootstrap_servers=self.settings.KAFKA_BOOTSTRAP_SERVERS,
                 client_id=f'{group_id}-{id}',
-                group_id = group_id,
-                max_poll_records = self.settings.KAFKA_MAX_POLL_RECORDS,
-                enable_auto_commit = False
+                group_id=group_id,
+                max_poll_records=self.settings.KAFKA_MAX_POLL_RECORDS,
+                enable_auto_commit=False
             )
             self._consumer_closing = False
             logger.info('Consumer created.')
@@ -52,10 +52,10 @@ class KafkaClient:
         if self.producer is None:
             logger.info('Creating producer. . . .')
             self.producer = AIOKafkaProducer(
-                bootstrap_servers = self.settings.KAFKA_BOOTSTRAP_SERVERS,
-                linger_ms = self.settings.KAFKA_LINGER_MS,
-                max_batch_size = self.settings.KAFKA_BATCH_SIZE,
-                value_serializer = self.json_serializer
+                bootstrap_servers=self.settings.KAFKA_BOOTSTRAP_SERVERS,
+                linger_ms=self.settings.KAFKA_LINGER_MS,
+                max_batch_size=self.settings.KAFKA_BATCH_SIZE,
+                value_serializer=self.json_serializer
             )
             self._producer_closing = False
             logger.info('Producer created.')
@@ -81,12 +81,12 @@ class KafkaClient:
         try:
             logger.debug(f'Sending message.')
             # Omit message key to use default round robin partitioning behavior
-            result = await self.producer.send_and_wait(topic, value = msg)
+            result = await self.producer.send_and_wait(topic, value=msg)
             logger.debug(
-                f'Successfully sent message {msg['id']} to '
-                f'topic={result.topic}, '
-                f'partition={result.partition}, '
-                f'offset={result.offset}')
+                f"Successfully sent message {msg['id']} to "
+                f"topic={result.topic}, "
+                f"partition={result.partition}, "
+                f"offset={result.offset}")
         except Exception as e:
             logger.exception(f'Kafka producer exception: {e}')
             raise Exception(e)
@@ -112,16 +112,16 @@ class KafkaClient:
                 self._producer_closing = True
                 await self.producer.stop()
             except Exception as e:
-                logger.exception('Exception while closing producer: {e}')
+                logger.exception(f'Exception while closing producer: {e}')
 
     async def close_consumer(self):
         if self.consumer:
             try:
-                logger.debug('Closing producer. . . .')
+                logger.debug('Closing consumer. . . .')
                 self._consumer_closing = True
                 await self.consumer.stop()
             except Exception as e:
-                logger.exception('Exception while closing producer: {e}')
+                logger.exception(f'Exception while closing consumer: {e}')
 
     async def close(self):
         await self.close_consumer()
