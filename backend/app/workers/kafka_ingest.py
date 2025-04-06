@@ -8,14 +8,14 @@ from app.models.jetstream_types import Message
 logger = logging.getLogger(__name__)
 
 # Constants for Kafka topics
-TOPIC_FIREHOSE_RAW = "bluesky-firehose-raw"
+TOPIC_JETSTREAM_RAW = "bluesky-jetstream-raw"
 
 class IngestClient:
     """
-    Client for ingesting data from the Bluesky Firehose and pushing it to Kafka.
+    Client for ingesting data from the Bluesky Jetstream and pushing it to Kafka.
     
     This client:
-    1. Connects to the Bluesky Firehose using JetstreamClient
+    1. Connects to the Bluesky Jetstream API using JetstreamClient
     2. Processes incoming messages
     3. Pushes the messages to a Kafka topic for further processing
     """
@@ -30,15 +30,15 @@ class IngestClient:
 
     async def process_message(self, message: Message) -> None:
         """
-        Process a message from the Firehose and push it to Kafka.
+        Process a message from the Jetstream and push it to Kafka.
         
         Args:
-            message: The Message object from the Firehose.
+            message: The Message object from Jetstream.
         """
         try:
             # We use message.did as the key for consistent partitioning
             await self.kafka_client.produce_msg(
-                TOPIC_FIREHOSE_RAW,
+                TOPIC_JETSTREAM_RAW,
                 message.model_dump()
             )
             
@@ -55,10 +55,10 @@ class IngestClient:
 
     async def stream_data(self) -> None:
         """
-        Stream data from the Bluesky Firehose to Kafka.
+        Stream data from the Bluesky Jetstream to Kafka.
         """
         self.running = True
-        logger.info("Starting Bluesky Firehose ingest...")
+        logger.info("Starting Bluesky Jetstream ingest...")
         
         # Connect to Jetstream
         await self.jetstream_client.connect()
@@ -75,7 +75,7 @@ class IngestClient:
                 await self.process_message(message)
                 
         except Exception as e:
-            logger.error(f"Error in Firehose stream: {e}")
+            logger.error(f"Error in Jetstream stream: {e}")
         finally:
             await self.stop()
             
@@ -89,7 +89,7 @@ class IngestClient:
         await self.jetstream_client.close()
         await self.kafka_client.close_producer()
         
-        logger.info("Bluesky Firehose ingest stopped")
+        logger.info("Bluesky Jetstream ingest stopped")
 
 
 async def start_ingest_client():

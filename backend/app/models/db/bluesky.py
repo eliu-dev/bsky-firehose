@@ -14,7 +14,7 @@ class BlueskyUser(DBBase, TimestampMixin):
     """
     Represents a Bluesky user account.
     
-    This model stores user information from the 'identity' and 'account' message types in the Bluesky Firehose.
+    This model stores user information from the 'identity' and 'account' message types in the Bluesky Jetstream.
     """
     
     __tablename__ = "bluesky_user"
@@ -98,7 +98,7 @@ class BlueskyPost(DBBase, TimestampMixin):
 
 class RawMessage(DBBase, TimestampMixin):
     """
-    Stores raw messages from Bluesky Firehose for archival and debugging.
+    Stores raw messages from Bluesky Jetstream for archival and debugging.
     """
     
     __tablename__ = "raw_message"

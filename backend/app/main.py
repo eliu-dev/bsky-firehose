@@ -1,3 +1,4 @@
+import asyncio
 import os
 import logging
 
@@ -6,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services import test_connection
+from tests import test_jetstream_db
 from app.core.logging import setup_local_logging, setup_prod_logging
 from app.core.config import settings
 from app.core.database import get_db
@@ -100,13 +101,17 @@ async def health_check():
     """
     return {"status": "healthy", "version": "0.1.0", "api_version": "v1"}
 
-@app.get("/firehose")
-async def get_firehose():
+@app.get("/jetstream-test")
+async def get_jetstream():
     """
-    Shortcut endpoint for initializing firehose
+    Shortcut endpoint for initializing jetstream
     """
-    await test_connection.test_connection()
-    return {"status": "firehose connection initiated"}
+    try:
+        await test_jetstream_db.main()
+    except:
+        print('Error in jetstream test')
+    
+    return {"status": "jetstream connection initiated"}
 
 @app.get("/db-test")
 async def db_test():

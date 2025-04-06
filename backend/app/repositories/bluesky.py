@@ -45,7 +45,7 @@ class BlueskyUserRepository(BaseRepository[BlueskyUser]):
         Create or update a user from an Identity message.
         
         Args:
-            identity: Bluesky Identity object from Firehose.
+            identity: Bluesky Identity object from Jetstream.
             
         Returns:
             The created or updated BlueskyUser instance.

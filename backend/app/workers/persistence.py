@@ -2,7 +2,7 @@
 Worker for consuming messages from Kafka and persisting them to PostgreSQL.
 
 This module provides a worker that:
-1. Consumes Bluesky Firehose messages from Kafka
+1. Consumes Bluesky Jetstream messages from Kafka
 2. Processes and transforms the messages 
 3. Persists them to PostgreSQL using the repository layer
 """
@@ -22,12 +22,12 @@ from app.repositories.bluesky import BlueskyUserRepository, BlueskyPostRepositor
 logger = logging.getLogger(__name__)
 
 # Constants for Kafka topics
-TOPIC_FIREHOSE_RAW = "bluesky-firehose-raw"
+TOPIC_JETSTREAM_RAW = "bluesky-jetstream-raw"
 
 
 class PersistenceWorker:
     """
-    Worker for consuming Bluesky Firehose messages from Kafka and persisting to PostgreSQL.
+    Worker for consuming Bluesky Jetstream messages from Kafka and persisting to PostgreSQL.
     
     This worker:
     1. Consumes messages from the Kafka topic
@@ -74,7 +74,7 @@ class PersistenceWorker:
     
     async def process_message(self, message: Message, session: AsyncSession) -> None:
         """
-        Process a Bluesky Firehose message and persist it to PostgreSQL.
+        Process a Bluesky Jetstream message and persist it to PostgreSQL.
         
         Args:
             message: Deserialized Message object.
@@ -166,12 +166,12 @@ class PersistenceWorker:
         )
         
         try:
-            # Subscribe to the Firehose raw topic
+            # Subscribe to the Jetstream raw topic
             assert self.kafka_client.consumer is not None
             await self.kafka_client.consumer.start()
-            self.kafka_client.consumer.subscribe([TOPIC_FIREHOSE_RAW])
+            self.kafka_client.consumer.subscribe([TOPIC_JETSTREAM_RAW])
             
-            logger.info(f"Subscribed to Kafka topic: {TOPIC_FIREHOSE_RAW}")
+            logger.info(f"Subscribed to Kafka topic: {TOPIC_JETSTREAM_RAW}")
             
             # Add circuit breaker pattern
             consecutive_errors = 0

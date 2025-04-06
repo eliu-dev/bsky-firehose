@@ -1,8 +1,8 @@
 """
-Client for connecting to and streaming from the Bluesky Firehose.
+Client for connecting to and streaming from the Bluesky Jetstream.
 
 This module provides a client for establishing a WebSocket connection to the
-Bluesky Firehose (Jetstream), processing the stream of events, and yielding
+Bluesky Jetsteram, processing the stream of events, and yielding
 parsed Message objects.
 """
 
@@ -112,10 +112,10 @@ class JetstreamClient:
     
     async def stream_messages(self) -> AsyncGenerator[Message, None]:
         """
-        Stream raw messages from the Jetstream Firehose.
+        Stream raw messages from the Jetstream Jetstream.
         
         Yields:
-            Raw message strings from the Firehose.
+            Raw message strings from the Jetstream.
         """
         if self.websocket is None:
             self.websocket = await self.connect()
@@ -180,7 +180,7 @@ class JetstreamClient:
         Subscribe to Jetstream and yield parsed Message objects.
         
         Yields:
-            Parsed Message objects from the Firehose.
+            Parsed Message objects from the Jetstream.
         """
         connection_attempts = 0
         max_attempts = 5
@@ -227,7 +227,7 @@ class JetstreamClient:
         
     async def resume_from_cursor(self, cursor: Optional[int] = None) -> None:
         """
-        Resume the firehose from a specific cursor.
+        Resume Jetstream from a specific cursor.
         
         Args:
             cursor: The cursor to resume from. If None, uses the last seen cursor.

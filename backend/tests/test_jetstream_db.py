@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 """
-Test script for Bluesky Firehose to PostgreSQL data flow.
+Test script for Bluesky Jetstream to PostgreSQL data flow.
 
 This script tests that our PostgreSQL code changes work properly by:
-1. Connecting to Bluesky Firehose using your JetstreamClient
-2. Processing a sample of messages through your database repositories
+1. Connecting to Bluesky Jetstream using JetstreamClient
+2. Processing a sample of messages through database repositories
 
-Usage:
-    python -m app.test_firehose_db [--limit=100]
 """
 
 import asyncio
@@ -32,10 +30,10 @@ from app.models.jetstream_types import Message, Commit, Identity, Account
 
 # Set up logging
 setup_local_logging()
-logger = logging.getLogger("firehose_db_test")
+logger = logging.getLogger("jetstream_db_test")
 
-class FirehoseDbTest:
-    """Test the Firehose-to-PostgreSQL data flow using existing clients."""
+class JetstreamDbTest:
+    """Test the Jetstream-to-PostgreSQL data flow using existing clients."""
     
     def __init__(self, message_limit: Optional[int] = 100):
         """Initialize the test with a specified message limit."""
@@ -66,7 +64,7 @@ class FirehoseDbTest:
         elapsed = time.time() - self.start_time if self.start_time else 0
         msgs_per_sec = self.stats["messages_processed"] / elapsed if elapsed > 0 else 0
         
-        print("\n--- Firehose DB Test Statistics ---")
+        print("\n--- Jetstream DB Test Statistics ---")
         print(f"Running for: {elapsed:.1f} seconds")
         print(f"Messages processed: {self.stats['messages_processed']} ({msgs_per_sec:.1f}/sec)")
         print(f"Users: {self.stats['users_created']} created, {self.stats['users_updated']} updated")
@@ -290,7 +288,7 @@ class FirehoseDbTest:
     async def run(self):
         """Run the test."""
         self.start_time = time.time()
-        logger.info("Starting Firehose DB test...")
+        logger.info("Starting Jetstream DB test...")
         
         # Initialize database
         await self.initialize_db()
@@ -305,8 +303,8 @@ class FirehoseDbTest:
         jetstream = JetstreamClient()
         
         try:
-            # Connect to Bluesky Firehose
-            logger.info("Connecting to Bluesky Firehose...")
+            # Connect to Bluesky Jetstream
+            logger.info("Connecting to Bluesky Jetstream...")
             
             # Process messages
             stop_requested = False
@@ -331,17 +329,17 @@ class FirehoseDbTest:
             await self.check_database_stats()
             await self.examine_raw_messages()
             
-            logger.info("Firehose DB test completed.")
+            logger.info("Jetstream DB test completed.")
 
 async def main():
     """Main entry point for the script."""
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description="Test Bluesky Firehose to PostgreSQL data flow")
+    parser = argparse.ArgumentParser(description="Test Bluesky Jetstream to PostgreSQL data flow")
     parser.add_argument("--limit", type=int, default=200, help="Number of messages to process")
     args = parser.parse_args()
     
     # Run the test
-    test = FirehoseDbTest(message_limit=args.limit)
+    test = JetstreamDbTest(message_limit=args.limit)
     await test.run()
 
 if __name__ == "__main__":
